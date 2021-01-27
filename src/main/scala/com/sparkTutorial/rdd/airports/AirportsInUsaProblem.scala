@@ -1,5 +1,8 @@
 package com.sparkTutorial.rdd.airports
 
+import com.sparkTutorial.commons.Utils
+import org.apache.spark.{SparkConf, SparkContext}
+
 object AirportsInUsaProblem {
   def main(args: Array[String]) {
 
@@ -15,5 +18,17 @@ object AirportsInUsaProblem {
        "Dowagiac Municipal Airport", "Dowagiac"
        ...
      */
+
+    val conf = new SparkConf().setAppName("AirportInUSAProblem").setMaster("local[*]")
+    val sc = new SparkContext(conf)
+
+    val airports = sc.textFile("in/airports.text")
+    val filtered_airports = airports.filter(line => line.contains("United States"))
+    val sliced_airports = filtered_airports.map(line => {
+      val splitted_line = line.split(Utils.COMMA_DELIMITER)
+      splitted_line(1) + ", " + splitted_line(2)
+    })
+    sliced_airports.saveAsTextFile("out/airports_in_usa.text")
+
   }
 }
