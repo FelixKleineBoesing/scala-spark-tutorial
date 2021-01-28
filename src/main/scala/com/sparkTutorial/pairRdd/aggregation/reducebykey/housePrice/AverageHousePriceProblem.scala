@@ -1,5 +1,8 @@
 package com.sparkTutorial.pairRdd.aggregation.reducebykey.housePrice
 
+import com.sparkTutorial.commons.Utils
+import org.apache.spark.{SparkConf, SparkContext}
+
 object AverageHousePriceProblem {
 
   def main(args: Array[String]) {
@@ -7,20 +10,20 @@ object AverageHousePriceProblem {
     /* Create a Spark program to read the house data from in/RealEstate.csv,
        output the average price for houses with different number of bedrooms.
 
-    The houses dataset contains a collection of recent real estate listings in San Luis Obispo county and
-    around it. 
+    The houses dataset contains a collection of recent real estate listings in San Luis Obispo county and
+    around it. 
 
-    The dataset contains the following fields:
-    1. MLS: Multiple listing service number for the house (unique ID).
-    2. Location: city/town where the house is located. Most locations are in San Luis Obispo county and
-    northern Santa Barbara county (Santa Maria­Orcutt, Lompoc, Guadelupe, Los Alamos), but there
-    some out of area locations as well.
-    3. Price: the most recent listing price of the house (in dollars).
-    4. Bedrooms: number of bedrooms.
-    5. Bathrooms: number of bathrooms.
-    6. Size: size of the house in square feet.
-    7. Price/SQ.ft: price of the house per square foot.
-    8. Status: type of sale. Thee types are represented in the dataset: Short Sale, Foreclosure and Regular.
+    The dataset contains the following fields:
+    1. MLS: Multiple listing service number for the house (unique ID).
+    2. Location: city/town where the house is located. Most locations are in San Luis Obispo county and
+    northern Santa Barbara county (Santa Maria­Orcutt, Lompoc, Guadelupe, Los Alamos), but there
+    some out of area locations as well.
+    3. Price: the most recent listing price of the house (in dollars).
+    4. Bedrooms: number of bedrooms.
+    5. Bathrooms: number of bathrooms.
+    6. Size: size of the house in square feet.
+    7. Price/SQ.ft: price of the house per square foot.
+    8. Status: type of sale. Thee types are represented in the dataset: Short Sale, Foreclosure and Regular.
 
     Each field is comma separated.
 
@@ -33,6 +36,20 @@ object AverageHousePriceProblem {
 
        3, 1 and 2 mean the number of bedrooms. 325000 means the average price of houses with 3 bedrooms is 325000.
      */
+    val conf = new SparkConf().setAppName("AverageHousePriceProblem").setMaster("local[*]")
+    val sc = new SparkContext(conf)
+    var house_prices = sc.textFile("in/RealEstate.csv")
+    house_prices = house_prices.filter(line => line.split(Utils.COMMA_DELIMITER)(0) != "MLS")
+    val bedroom_price = house_prices.map(line => {
+      val splits = line.split(Utils.COMMA_DELIMITER)
+      (splits(3), splits(2).toFloat)
+    })
+
+    val price_per_number_bedrooms = bedroom_price.reduceByKey((x, y) => (x + y) / 2)
+    for ((number_rooms, price) <- price_per_number_bedrooms) {
+      println("Number of rooms: " + number_rooms + " , Avg. Price: " + price)
+    }
+    
   }
 
 }

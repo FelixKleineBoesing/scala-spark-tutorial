@@ -9,7 +9,7 @@ import scala.io.Source
 object UkMakerSpaces {
 
   def main(args: Array[String]) {
-    Logger.getLogger("org").setLevel(Level.ERROR)
+    Logger.getLogger("org").setLevel(Level.INFO)
     val conf = new SparkConf().setAppName("UkMakerSpaces").setMaster("local[1]")
     val sparkContext = new SparkContext(conf)
 
